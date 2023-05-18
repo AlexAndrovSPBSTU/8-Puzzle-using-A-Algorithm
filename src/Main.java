@@ -4,12 +4,14 @@ public class Main {
     static int[] p1 = {1, 2, 3, 4, 5, 6, 8, 7, 0};
     static int[] p2 = {1, 8, 2, 0, 4, 3, 7, 6, 5};
     static int[] p3 = {1, 2, 3, 0, 4, 6, 7, 5, 8};
-    static Node goal = new Node(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0});
+    static int[] notGoal = {1, 2, 3, 4, 5, 6, 7, 0, 8};
+    static Node goal = new Node(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 0});
 
     public static void main(String[] args) {
         Solver solver = new Solver();
-        if (!isSolvable(p1)) return;
-        solver.solve(p1);
+//        System.out.println(new Node(notGoal).isGoal());
+//        if (!isSolvable(p2)) return;
+        solver.solve(p3);
     }
 
     static class Solver {
@@ -30,7 +32,7 @@ public class Main {
             Node childMin = null;
             for (int i : getElementsShouldBeSwaped(parent)) {
                 Node child = new Node(swapZeroWith(parent, i));
-                child.h = getDistFromGoal(child);
+                child.h = getDistFromGoal1(child);
                 if (child.getF() < minF) {
                     minF = child.getF();
                     childMin = child;
@@ -50,9 +52,10 @@ public class Main {
 
         List<Integer> getElementsShouldBeSwaped(Node node) {
             int zeroCoordinate = getZeroCoordinate(node);
+            List<Integer> neighboors;
             switch (zeroCoordinate) {
                 case 0:
-                    List<Integer> neighboors = new ArrayList<>(List.of(1, 3));
+                    neighboors = new ArrayList<>(List.of(1, 3));
                     Collections.shuffle(neighboors);
                     return neighboors;
                 case 1:
@@ -113,7 +116,7 @@ public class Main {
         }
 
         boolean isGoal() {
-            return getDistFromGoal(this) == 0;
+            return getDistFromGoal1(this) == 0;
         }
 
         void print() {
@@ -127,12 +130,20 @@ public class Main {
 
     static int getDistFromGoal(Node node) {
         int sum = 0;
-        for (int k = 0; k < 8; k++) {
-            if (node.puzzles[k] != k + 1) sum++;
+        for (int k = 0; k < 9; k++) {
+            if (node.puzzles[k] != k + 1 && node.puzzles[k] != 0) sum++;
         }
         return sum;
     }
 
+    static int getDistFromGoal1(Node node) {
+        int sum = 0;
+        for (int k = 0; k < 9; k++) {
+            if (node.puzzles[k] - 1 != k && node.puzzles[k] != 0)
+                sum += Math.abs((node.puzzles[k] - 1) / 3 - k / 3) + Math.abs((node.puzzles[k] - 1) % 3 - k % 3);
+        }
+        return sum;
+    }
 
     // A utility function to count inversions in given array 'arr[]'
     static int getInvCount(int[] arr) {
